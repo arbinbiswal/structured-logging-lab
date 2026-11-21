@@ -106,11 +106,57 @@ docker logs orders-api | jq 'select(.reqId=="96258b2e-b49d-4f50-8335-011fee2643a
 
 The source implementation binds one unchanged `reqId` to all request records.
 
+## Work Flow and Issue Resolution
+
+1. **Initial repository mismatch:** The first workspace was
+   `cloudnotes-ops-readiness-lab`, not the requested `structured-logging-lab`.
+   It had a different Python application, no `orders-api`, and no Docker Compose
+   setup. The requested repository was cloned separately and the work continued
+   in `C:\Users\zzjzj\Desktop\structured-logging-lab`.
+
+2. **Fork and branch setup:** The assignment required working from a fork. The
+   feature branch `feat/structured-logging` was created in the cloned repository.
+   The implementation was committed locally before the fork was available.
+
+3. **Initial Docker failure:** `docker compose up -d --build` first failed
+   because Docker Desktop's Linux engine was not running. Docker Desktop was
+   started, the command was retried, and both `orders-api` and PostgreSQL started
+   successfully.
+
+4. **Port conflict:** A local Node process from the earlier non-Docker test was
+   still listening on port `3000`, so Compose could not bind the API port. The
+   process was stopped and the Compose stack was started again.
+
+5. **Missing jq:** The required `jq` command was initially unavailable. `jq`
+   version `1.8.2` was installed with WinGet, and both required filters were then
+   executed against real Docker logs.
+
+6. **Container name mismatch:** Compose initially generated the name
+   `structured-logging-lab-orders-api-1`, while the assignment required
+   `docker logs orders-api`. `container_name: orders-api` was added to
+   `docker-compose.yml`, the stack was rebuilt, and the exact assignment command
+   worked.
+
+7. **Before/after evidence:** The original commit was run in a temporary
+   worktree to capture the old plain-text logs. The updated branch was then run
+   in Docker to capture the JSON error and request-ID traces.
+
+8. **GitHub push failure:** A direct push to the upstream repository returned
+   HTTP 403 because the account did not have write permission there. A fork was
+   created at `arbinbiswal/structured-logging-lab`, the branch was pushed to the
+   fork, and the upstream pull request was created from the fork branch.
+
+9. **Pull request description issue:** The first PR description attempt allowed
+   shell backticks to be interpreted while using an inline command. The
+   description was corrected using a Markdown body file, and the duplicate
+   fork-only PR was closed.
+
 ## Important Commands
 
 | Command | Purpose |
 | --- | --- |
 | `git clone https://github.com/kalviumcommunity/structured-logging-lab.git` | Clone the assignment repository. |
+| `gh repo fork kalviumcommunity/structured-logging-lab --fork-name structured-logging-lab` | Create a personal fork with write access. |
 | `git checkout -b feat/structured-logging` | Create the required feature branch. |
 | `docker compose up -d --build` | Build and start the API and PostgreSQL containers. |
 | `docker logs orders-api` | Display the API container logs. |
@@ -121,7 +167,8 @@ The source implementation binds one unchanged `reqId` to all request records.
 | `node --check src/server.js` | Check JavaScript syntax without starting the service. |
 | `git diff --check` | Detect whitespace errors in the changes. |
 | `git commit -m "Implement structured request logging"` | Save the implementation changes in git. |
-| `git push -u origin feat/structured-logging` | Publish the feature branch for pull request creation. |
+| `git push -u fork feat/structured-logging` | Publish the feature branch to the personal fork. |
+| `gh pr create --repo kalviumcommunity/structured-logging-lab --head arbinbiswal:feat/structured-logging` | Create a pull request from the fork into the main repository. |
 
 ## Overall Progress
 
@@ -138,21 +185,15 @@ The source implementation binds one unchanged `reqId` to all request records.
 - `npm install` completed with zero reported vulnerabilities.
 - A local `/simulate-error` request returned HTTP 500 and produced a coherent
   JSON request trace.
-- Commit `702689b` (`Implement structured request logging`) was created.
+- The original plain-text logs and updated Docker JSON logs were captured.
+- The exact `docker logs orders-api | jq ...` filters were executed successfully.
+- Commit `702689b` (`Implement structured request logging`) and follow-up
+  documentation commits were created.
+- Upstream PR #10 was created:
+  https://github.com/kalviumcommunity/structured-logging-lab/pull/10
 
 ### Remaining or requiring attention
 
-- Docker Compose verification completed successfully after Docker Desktop was
-  started.
-- `jq` 1.8.2 was installed and both required filters were executed against the
-  container logs.
-- The Compose service now uses the required container name `orders-api`, so the
-  assignment's exact `docker logs orders-api` commands work.
-- The upstream push was previously rejected with HTTP 403 because the current
-  GitHub account cannot push directly to `kalviumcommunity/structured-logging-lab`.
-- The branch was pushed to the writable fork and the upstream pull request was
-  created: https://github.com/kalviumcommunity/structured-logging-lab/pull/10
-- The duplicate fork-only pull request was closed after the upstream PR was
-  created.
+- PR #10 is open and still needs maintainer review and merge.
 - The required short video walkthrough still needs to be recorded and
   submitted.
