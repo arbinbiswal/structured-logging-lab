@@ -150,5 +150,9 @@ The source implementation binds one unchanged `reqId` to all request records.
   assignment's exact `docker logs orders-api` commands work.
 - The upstream push was previously rejected with HTTP 403 because the current
   GitHub account cannot push directly to `kalviumcommunity/structured-logging-lab`.
-- A writable fork and pull request are still being handled as the final git
-  submission step.
+- The branch was pushed to the writable fork and the upstream pull request was
+  created: https://github.com/kalviumcommunity/structured-logging-lab/pull/10
+- The duplicate fork-only pull request was closed after the upstream PR was
+  created.
+- The required short video walkthrough still needs to be recorded and
+  submitted.
