@@ -66,16 +66,33 @@ password, token, or payment credential is logged.
 
 ### Failure trace evidence
 
-The Docker verification returned HTTP 500 from `/simulate-error` and produced
+Before the change, the original container emitted unstructured lines after
+startup and test requests:
+
+```text
+starting
+connecting...
+done
+error
+retry
+payment started
+payment
+error happened
+ok
+done
+```
+
+The Docker verification after the change returned HTTP 500 from
+`/simulate-error` and produced
 this request ID:
-`121d95b5-797d-4a90-bece-f5207287e2fb`.
+`96258b2e-b49d-4f50-8335-011fee2643a4`.
 
 The observed JSON records for that request were:
 
 ```json
-{"ts":"2026-11-21T05:18:44.078Z","level":"info","service":"orders-api","msg":"request.start","reqId":"121d95b5-797d-4a90-bece-f5207287e2fb","method":"GET","path":"/simulate-error"}
-{"ts":"2026-11-21T05:18:44.080Z","level":"error","service":"orders-api","msg":"payment.failed","reqId":"121d95b5-797d-4a90-bece-f5207287e2fb","error":"simulated payment dependency failure"}
-{"ts":"2026-11-21T05:18:44.108Z","level":"info","service":"orders-api","msg":"request.complete","reqId":"121d95b5-797d-4a90-bece-f5207287e2fb","method":"GET","path":"/simulate-error","statusCode":500,"durationMs":30}
+{"ts":"2026-11-21T05:43:17.826Z","level":"info","service":"orders-api","msg":"request.start","reqId":"96258b2e-b49d-4f50-8335-011fee2643a4","method":"GET","path":"/simulate-error"}
+{"ts":"2026-11-21T05:43:17.827Z","level":"error","service":"orders-api","msg":"payment.failed","reqId":"96258b2e-b49d-4f50-8335-011fee2643a4","error":"simulated payment dependency failure"}
+{"ts":"2026-11-21T05:43:17.837Z","level":"info","service":"orders-api","msg":"request.complete","reqId":"96258b2e-b49d-4f50-8335-011fee2643a4","method":"GET","path":"/simulate-error","statusCode":500,"durationMs":11}
 ```
 
 The error record showed the request ID immediately, and filtering all records
@@ -84,7 +101,7 @@ the container evidence are:
 
 ```bash
 docker logs orders-api | jq 'select(.level=="error")'
-docker logs orders-api | jq 'select(.reqId=="121d95b5-797d-4a90-bece-f5207287e2fb")'
+docker logs orders-api | jq 'select(.reqId=="96258b2e-b49d-4f50-8335-011fee2643a4")'
 ```
 
 The source implementation binds one unchanged `reqId` to all request records.
@@ -129,6 +146,8 @@ The source implementation binds one unchanged `reqId` to all request records.
   started.
 - `jq` 1.8.2 was installed and both required filters were executed against the
   container logs.
+- The Compose service now uses the required container name `orders-api`, so the
+  assignment's exact `docker logs orders-api` commands work.
 - The upstream push was previously rejected with HTTP 403 because the current
   GitHub account cannot push directly to `kalviumcommunity/structured-logging-lab`.
 - A writable fork and pull request are still being handled as the final git
