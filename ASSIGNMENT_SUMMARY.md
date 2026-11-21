@@ -66,16 +66,16 @@ password, token, or payment credential is logged.
 
 ### Failure trace evidence
 
-The local Node verification returned HTTP 500 from `/simulate-error` and
-produced this request ID:
-`77ff1498-c4fa-4b64-ac18-a9d4dddc7fde`.
+The Docker verification returned HTTP 500 from `/simulate-error` and produced
+this request ID:
+`121d95b5-797d-4a90-bece-f5207287e2fb`.
 
 The observed JSON records for that request were:
 
 ```json
-{"ts":"2026-11-21T04:34:34.726Z","level":"info","service":"orders-api","msg":"request.start","reqId":"77ff1498-c4fa-4b64-ac18-a9d4dddc7fde","method":"GET","path":"/simulate-error"}
-{"ts":"2026-11-21T04:34:34.728Z","level":"error","service":"orders-api","msg":"payment.failed","reqId":"77ff1498-c4fa-4b64-ac18-a9d4dddc7fde","error":"simulated payment dependency failure"}
-{"ts":"2026-11-21T04:34:34.752Z","level":"info","service":"orders-api","msg":"request.complete","reqId":"77ff1498-c4fa-4b64-ac18-a9d4dddc7fde","method":"GET","path":"/simulate-error","statusCode":500,"durationMs":26}
+{"ts":"2026-11-21T05:18:44.078Z","level":"info","service":"orders-api","msg":"request.start","reqId":"121d95b5-797d-4a90-bece-f5207287e2fb","method":"GET","path":"/simulate-error"}
+{"ts":"2026-11-21T05:18:44.080Z","level":"error","service":"orders-api","msg":"payment.failed","reqId":"121d95b5-797d-4a90-bece-f5207287e2fb","error":"simulated payment dependency failure"}
+{"ts":"2026-11-21T05:18:44.108Z","level":"info","service":"orders-api","msg":"request.complete","reqId":"121d95b5-797d-4a90-bece-f5207287e2fb","method":"GET","path":"/simulate-error","statusCode":500,"durationMs":30}
 ```
 
 The error record showed the request ID immediately, and filtering all records
@@ -84,7 +84,7 @@ the container evidence are:
 
 ```bash
 docker logs orders-api | jq 'select(.level=="error")'
-docker logs orders-api | jq 'select(.reqId=="77ff1498-c4fa-4b64-ac18-a9d4dddc7fde")'
+docker logs orders-api | jq 'select(.reqId=="121d95b5-797d-4a90-bece-f5207287e2fb")'
 ```
 
 The source implementation binds one unchanged `reqId` to all request records.
@@ -125,14 +125,11 @@ The source implementation binds one unchanged `reqId` to all request records.
 
 ### Remaining or requiring attention
 
-- Docker verification could not be completed because Docker Desktop's Linux
-  engine was unavailable in the environment.
-- `jq` verification could not be executed because `jq` is not installed in the
-  environment.
-- The push to the upstream repository was rejected with HTTP 403 because the
-  current GitHub account has no permission to push to
-  `kalviumcommunity/structured-logging-lab`.
-- A pull request therefore still needs to be opened from a fork after pushing
-  the branch with appropriate GitHub access.
-- Before submission, supplement the local evidence with the exact `docker logs`
-  and `jq` output from a running Docker environment.
+- Docker Compose verification completed successfully after Docker Desktop was
+  started.
+- `jq` 1.8.2 was installed and both required filters were executed against the
+  container logs.
+- The upstream push was previously rejected with HTTP 403 because the current
+  GitHub account cannot push directly to `kalviumcommunity/structured-logging-lab`.
+- A writable fork and pull request are still being handled as the final git
+  submission step.
