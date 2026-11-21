@@ -79,8 +79,8 @@ The observed JSON records for that request were:
 ```
 
 The error record showed the request ID immediately, and filtering all records
-with that ID showed the start, failure, and completion story. The two JSON lines
-above are the intended container commands:
+with that ID showed the start, failure, and completion story. The commands for
+the container evidence are:
 
 ```bash
 docker logs orders-api | jq 'select(.level=="error")'
@@ -134,6 +134,5 @@ The source implementation binds one unchanged `reqId` to all request records.
   `kalviumcommunity/structured-logging-lab`.
 - A pull request therefore still needs to be opened from a fork after pushing
   the branch with appropriate GitHub access.
-- Before submission, replace the local evidence section with the exact
-  `docker logs` and `jq` output from a running Docker environment, and correct
-  the copied request ID values so every line matches exactly.
+- Before submission, supplement the local evidence with the exact `docker logs`
+  and `jq` output from a running Docker environment.
